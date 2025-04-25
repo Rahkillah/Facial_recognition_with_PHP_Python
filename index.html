@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reconnaissance Faciale</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        video,
+        canvas {
+            border: 2px solid #333;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            max-width: 100%;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Reconnaissance Faciale (PHP + Python)</h2>
+
+    <video id="video" width="400" autoplay playsinline style="display:none;"></video>
+    <canvas id="canvas" width="400" height="300" style="display: none;"></canvas>
+
+    <div class="buttons">
+        <button id="startCamera">Activer la caméra</button>
+        <button id="stopCamera" disabled>Désactiver</button>
+        <button id="capture" disabled>Capturez</button>
+        <button id="saveReference" disabled>Enregistrer comme référence</button>
+        <button id="verifyFace" disabled>Vérifier le visage</button>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        const startBtn = document.getElementById('startCamera');
+        const stopBtn = document.getElementById('stopCamera');
+        const captureBtn = document.getElementById('capture');
+        const saveRefBtn = document.getElementById('saveReference');
+        const verifyBtn = document.getElementById('verifyFace');
+
+        let stream = null;
+
+        startBtn.addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: "environment" } }
+            }).then(s => {
+                stream = s;
+                video.srcObject = stream;
+                video.style.display = 'block';
+                captureBtn.disabled = false;
+                stopBtn.disabled = false;
+                startBtn.disabled = true;
+            }).catch(err => alert("Erreur webcam : " + err));
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                video.style.display = 'none';
+                captureBtn.disabled = true;
+                stopBtn.disabled = true;
+                startBtn.disabled = false;
+            }
+        });
+
+        captureBtn.addEventListener('click', () => {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/png');
+
+            fetch('capture.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'image=' + encodeURIComponent(dataURL)
+            })
+                .then(res => res.text())
+                .then(msg => {
+                    alert(msg);
+                    saveRefBtn.disabled = false;
+                    verifyBtn.disabled = false;
+                })
+                .catch(err => alert("Erreur capture : " + err));
+        });
+
+        saveRefBtn.addEventListener('click', () => {
+            fetch('save_reference.php')
+                .then(res => res.text())
+                .then(msg => alert(msg))
+                .catch(err => alert("Erreur enregistrement référence : " + err));
+        });
+
+        verifyBtn.addEventListener('click', () => {
+            fetch('faceRecognition.php')
+                .then(res => res.text())
+                .then(msg => alert(msg))
+                .catch(err => alert("Erreur reconnaissance : " + err));
+        });
+    </script>
+
+</body>
+
+</html>

@@ -15,4 +15,4 @@ This project lets you **capture an image via webcam** from a browser, then perfo
 ---
 
 ## License
-© [RANDRIANAOVO Andrandraina](https://facebook.com.com/andrandraina.10)
+© [RANDRIANAOVO Andrandraina](https://www.linkedin.com/in/andrandraina-randrianaivo-562aa3282/)

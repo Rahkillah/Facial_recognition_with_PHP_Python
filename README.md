@@ -14,9 +14,5 @@ This project lets you **capture an image via webcam** from a browser, then perfo
 
 ---
 
-## 📁 File structure
-
-Translated with DeepL.com (free version)
-
 ## License
 © [RANDRIANAOVO Andrandraina](https://facebook.com.com/andrandraina.10)
